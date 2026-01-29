@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Cole - Wedding Planning Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .section-card {
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app"></div>
+
+    <script type="module">
+        import React, { useState, useEffect } from 'https://esm.sh/react@18.2.0';
+        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSrZma1hN8KuM9bWD_CapGAVdWWRt0MfmEZkhJAGMCCTAaVmvCJW9VNR0Dp7dQb10Etw/exec';
+
+        function App() {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [accessCode, setAccessCode] = useState('');
+            const [clientData, setClientData] = useState(null);
+            const [formData, setFormData] = useState({});
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [saveMessage, setSaveMessage] = useState('');
+            const [currentSection, setCurrentSection] = useState('basic');
+
+            // Load saved access code from localStorage on mount
+            useEffect(() => {
+                const savedCode = localStorage.getItem('weddingPortalAccessCode');
+                if (savedCode) {
+                    handleLogin(savedCode, true);
+                }
+            }, []);
+
+            const handleLogin = async (code = accessCode, silent = false) => {
+                if (!silent) setLoading(true);
+                setError('');
+
+                try {
+                    const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&accessCode=${code}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        setIsLoggedIn(true);
+                        setClientData(data.clientData);
+                        setFormData(data.weddingDetails || {});
+                        localStorage.setItem('weddingPortalAccessCode', code);
+                    } else {
+                        setError(data.message || 'Invalid access code. Please check and try again.');
+                        localStorage.removeItem('weddingPortalAccessCode');
+                    }
+                } catch (err) {
+                    setError('Unable to connect. Please try again later.');
+                    console.error('Login error:', err);
+                }
+
+                if (!silent) setLoading(false);
+            };
+
+            const handleSave = async () => {
+                setLoading(true);
+                setSaveMessage('');
+                setError('');
+
+                try {
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'save',
+                            accessCode: localStorage.getItem('weddingPortalAccessCode'),
+                            formData: formData
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        setSaveMessage('Saved successfully! ✓');
+                        setTimeout(() => setSaveMessage(''), 3000);
+                    } else {
+                        setError(data.message || 'Failed to save. Please try again.');
+                    }
+                } catch (err) {
+                    setError('Unable to save. Please try again later.');
+                    console.error('Save error:', err);
+                }
+
+                setLoading(false);
+            };
+
+            const handleLogout = () => {
+                setIsLoggedIn(false);
+                setAccessCode('');
+                setClientData(null);
+                setFormData({});
+                setCurrentSection('basic');
+                localStorage.removeItem('weddingPortalAccessCode');
+            };
+
+            const updateFormData = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const calculateProgress = () => {
+                const totalFields = 50; // Approximate number of important fields
+                const filledFields = Object.values(formData).filter(v => v && v !== '').length;
+                return Math.min(Math.round((filledFields / totalFields) * 100), 100);
+            };
+
+            if (!isLoggedIn) {
+                return <LoginScreen 
+                    accessCode={accessCode} 
+                    setAccessCode={setAccessCode} 
+                    handleLogin={() => handleLogin()}
+                    loading={loading}
+                    error={error}
+                />;
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <Header clientData={clientData} handleLogout={handleLogout} />
+                    
+                    <div className="max-w-5xl mx-auto px-4 py-8">
+                        <ProgressBar progress={calculateProgress()} />
+                        
+                        <WelcomeMessage clientData={clientData} />
+                        
+                        <SectionNav currentSection={currentSection} setCurrentSection={setCurrentSection} />
+                        
+                        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                            {currentSection === 'basic' && <BasicInfoSection formData={formData} updateFormData={updateFormData} />}
+                            {currentSection === 'reception' && <ReceptionSection formData={formData} updateFormData={updateFormData} />}
+                            {currentSection === 'dances' && <DancesSection formData={formData} updateFormData={updateFormData} />}
+                            {currentSection === 'songs' && <SongsSection formData={formData} updateFormData={updateFormData} />}
+                            {currentSection === 'ceremony' && <CeremonySection formData={formData} updateFormData={updateFormData} />}
+                            {currentSection === 'additional' && <AdditionalSection formData={formData} updateFormData={updateFormData} />}
+                        </div>
+
+                        <SaveButton handleSave={handleSave} loading={loading} saveMessage={saveMessage} error={error} />
+                    </div>
+                </div>
+            );
+        }
+
+        function LoginScreen({ accessCode, setAccessCode, handleLogin, loading, error }) {
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+                    <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">DJ Cole</h1>
+                            <p className="text-gray-600">Wedding Planning Portal</p>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Access Code
+                            </label>
+                            <input
+                                type="text"
+                                value={accessCode}
+                                onChange={(e) => setAccessCode(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                placeholder="lastname-MMDDYY"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                disabled={loading}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Example: maddox-041426
+                            </p>
+                        </div>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            onClick={handleLogin}
+                            disabled={loading || !accessCode}
+                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                        >
+                            {loading ? 'Logging in...' : 'Access Portal'}
+                        </button>
+
+                        <p className="text-xs text-gray-500 mt-4 text-center">
+                            Your access code was provided in your welcome email. Contact DJ Cole if you need assistance.
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        function Header({ clientData, handleLogout }) {
+            return (
+                <div className="bg-white border-b border-gray-200">
+                    <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">DJ Cole - Wedding Planning</h1>
+                            <p className="text-sm text-gray-600">
+                                {clientData?.name} • {new Date(clientData?.weddingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleLogout}
+                            className="text-sm text-gray-600 hover:text-gray-900"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function ProgressBar({ progress }) {
+            return (
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700">Form Completion</span>
+                        <span className="text-sm font-medium text-blue-600">{progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                            className="progress-bar bg-blue-600 h-2 rounded-full" 
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                </div>
+            );
+        }
+
+        function WelcomeMessage({ clientData }) {
+            return (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h2 className="font-semibold text-blue-900 mb-1">Welcome to Your Planning Portal!</h2>
+                    <p className="text-sm text-blue-800">
+                        Fill out as much as you can now, and come back anytime to update your details. 
+                        I won't need everything until the week of your wedding, so no rush!
+                    </p>
+                </div>
+            );
+        }
+
+        function SectionNav({ currentSection, setCurrentSection }) {
+            const sections = [
+                { id: 'basic', label: 'Basic Info' },
+                { id: 'reception', label: 'Reception' },
+                { id: 'dances', label: 'Dances' },
+                { id: 'songs', label: 'Song Selection' },
+                { id: 'ceremony', label: 'Ceremony' },
+                { id: 'additional', label: 'Additional' }
+            ];
+
+            return (
+                <div className="mb-6 overflow-x-auto">
+                    <div className="flex space-x-2 min-w-max">
+                        {sections.map(section => (
+                            <button
+                                key={section.id}
+                                onClick={() => setCurrentSection(section.id)}
+                                className={`px-4 py-2 rounded-lg font-medium transition ${
+                                    currentSection === section.id
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                }`}
+                            >
+                                {section.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function BasicInfoSection({ formData, updateFormData }) {
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h3>
+                    
+                    <FormField label="Bride & Groom's Names" required>
+                        <input
+                            type="text"
+                            value={formData.coupleNames || ''}
+                            onChange={(e) => updateFormData('coupleNames', e.target.value)}
+                            placeholder="e.g., Camille Tims & Parker Carlson"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Couple's Married Name" required>
+                        <input
+                            type="text"
+                            value={formData.marriedName || ''}
+                            onChange={(e) => updateFormData('marriedName', e.target.value)}
+                            placeholder="e.g., Parker & Camille Carlson"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Address of Ceremony & Reception" required>
+                        <textarea
+                            value={formData.venueAddress || ''}
+                            onChange={(e) => updateFormData('venueAddress', e.target.value)}
+                            placeholder="Enter full address"
+                            rows="2"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <div className="grid md:grid-cols-3 gap-4">
+                        <FormField label="Ceremony Start Time" required>
+                            <input
+                                type="time"
+                                value={formData.ceremonyStartTime || ''}
+                                onChange={(e) => updateFormData('ceremonyStartTime', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Reception Start Time" required>
+                            <input
+                                type="time"
+                                value={formData.receptionStartTime || ''}
+                                onChange={(e) => updateFormData('receptionStartTime', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Reception End Time" required>
+                            <input
+                                type="time"
+                                value={formData.receptionEndTime || ''}
+                                onChange={(e) => updateFormData('receptionEndTime', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+                    </div>
+
+                    <p className="text-sm text-gray-600 italic">
+                        Reminder: extra time is $100/hr after contracted amount of time // $250/hr if added on the day of your wedding.
+                    </p>
+
+                    <FormField label="How many guests are you expecting?" required>
+                        <input
+                            type="text"
+                            value={formData.guestCount || ''}
+                            onChange={(e) => updateFormData('guestCount', e.target.value)}
+                            placeholder="e.g., 200-250"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Photographer/Videographer Name/Company">
+                        <input
+                            type="text"
+                            value={formData.photographer || ''}
+                            onChange={(e) => updateFormData('photographer', e.target.value)}
+                            placeholder="e.g., Taylor Patrick - Photography"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Caterer Name/Company">
+                        <input
+                            type="text"
+                            value={formData.caterer || ''}
+                            onChange={(e) => updateFormData('caterer', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Wedding Hashtag (if applicable)">
+                        <input
+                            type="text"
+                            value={formData.hashtag || ''}
+                            onChange={(e) => updateFormData('hashtag', e.target.value)}
+                            placeholder="e.g., #KeepingupwiththeCarlsons"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+                </div>
+            );
+        }
+
+        function ReceptionSection({ formData, updateFormData }) {
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Reception Specifics</h3>
+                    
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-yellow-900">
+                            <strong>PLEASE NOTICE:</strong> If sections are left blank, then DJ Cole will assume that nothing is needed for this part.
+                        </p>
+                    </div>
+
+                    <FormField label="Will the Bridal Party be announced?" required>
+                        <select
+                            value={formData.bridalPartyAnnounced || ''}
+                            onChange={(e) => updateFormData('bridalPartyAnnounced', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Select...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                            <option value="partial">Just "here's the bridal party" not all the names specifically</option>
+                        </select>
+                    </FormField>
+
+                    {formData.bridalPartyAnnounced === 'yes' && (
+                        <FormField label="List how they will be announced (phonetically if needed)">
+                            <textarea
+                                value={formData.bridalPartyNames || ''}
+                                onChange={(e) => updateFormData('bridalPartyNames', e.target.value)}
+                                placeholder="List each person/couple on a new line"
+                                rows="6"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <p className="text-sm text-gray-600 mt-2">
+                                Please have someone (coordinator, family member, bridal party member) alert the DJ prior to announcing the Bridal party and Bride & Groom.
+                            </p>
+                        </FormField>
+                    )}
+
+                    <FormField label="What name would you like to be announced as?" required>
+                        <input
+                            type="text"
+                            value={formData.announcedName || ''}
+                            onChange={(e) => updateFormData('announcedName', e.target.value)}
+                            placeholder="e.g., Mr. & Mrs. Parker Carlson"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Song for Bridal Party Announcement (if applicable)">
+                        <input
+                            type="text"
+                            value={formData.bridalPartySong || ''}
+                            onChange={(e) => updateFormData('bridalPartySong', e.target.value)}
+                            placeholder='e.g., "Dog Days Are Over" by Florence and the Machine'
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Song for Bride & Groom Announcement (if applicable)">
+                        <input
+                            type="text"
+                            value={formData.coupleAnnouncementSong || ''}
+                            onChange={(e) => updateFormData('coupleAnnouncementSong', e.target.value)}
+                            placeholder='e.g., "Dog Days Are Over" by Florence and the Machine'
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Will there be a blessing before the meal? If yes, who will deliver it?">
+                        <input
+                            type="text"
+                            value={formData.blessing || ''}
+                            onChange={(e) => updateFormData('blessing', e.target.value)}
+                            placeholder="e.g., Yes, bride's father"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Will there be toasts/speeches sometime throughout the night?">
+                        <select
+                            value={formData.toasts || ''}
+                            onChange={(e) => updateFormData('toasts', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Select...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                        <p className="text-sm text-gray-600 mt-2">
+                            If yes, I will have a microphone ready for the givers when they are ready.
+                        </p>
+                    </FormField>
+                </div>
+            );
+        }
+
+        function DancesSection({ formData, updateFormData }) {
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Dances & Song Selection</h3>
+                    
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-yellow-900">
+                            <strong>PLEASE NOTICE:</strong> If sections are left blank, then DJ Cole will assume that nothing is needed for this part. 
+                            If the event will not take place, please mark as N/A.
+                        </p>
+                    </div>
+
+                    <FormField label="When do you want to do your first dance?" required>
+                        <select
+                            value={formData.firstDanceTiming || ''}
+                            onChange={(e) => updateFormData('firstDanceTiming', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Select...</option>
+                            <option value="first-enter">When we first enter the reception</option>
+                            <option value="later">After we've had a chance to mingle and eat</option>
+                            <option value="na">N/A</option>
+                        </select>
+                    </FormField>
+
+                    <FormField label="When do you want to do the other dances (daddy/daughter, mother/son, etc.)?" required>
+                        <select
+                            value={formData.otherDancesTiming || ''}
+                            onChange={(e) => updateFormData('otherDancesTiming', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Select...</option>
+                            <option value="first-enter">When we first enter</option>
+                            <option value="later">After we've had a chance to mingle and eat</option>
+                            <option value="na">N/A</option>
+                        </select>
+                    </FormField>
+
+                    <FormField label="If you'd like to do the timing differently than above, explain here:">
+                        <textarea
+                            value={formData.danceTimingNotes || ''}
+                            onChange={(e) => updateFormData('danceTimingNotes', e.target.value)}
+                            rows="2"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="What will be the order of the dances?" required>
+                        <input
+                            type="text"
+                            value={formData.danceOrder || ''}
+                            onChange={(e) => updateFormData('danceOrder', e.target.value)}
+                            placeholder="e.g., first dance, daddy/daughter, mother/son"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="text-sm text-gray-600 mt-2">
+                            I will usually let these play out about 2 to 2.5 minutes before fading out, but I can let them play longer or shorten them if needed. 
+                            If you're ready to end the song, look at me and nod your head or give me the "ok you can fade it out" look.
+                        </p>
+                    </FormField>
+
+                    <div className="space-y-4 border-t pt-6">
+                        <h4 className="font-semibold text-gray-900">Special Dance Songs</h4>
+                        
+                        <FormField label="Bride and Groom's First Dance Song" required>
+                            <input
+                                type="text"
+                                value={formData.firstDanceSong || ''}
+                                onChange={(e) => updateFormData('firstDanceSong', e.target.value)}
+                                placeholder='e.g., "Lifetime" by Justin Bieber'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Bride's Dance with her Father Song">
+                            <input
+                                type="text"
+                                value={formData.fatherDaughterSong || ''}
+                                onChange={(e) => updateFormData('fatherDaughterSong', e.target.value)}
+                                placeholder='e.g., "Landslide" by Fleetwood Mac or N/A'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Groom's Dance with his Mother Song">
+                            <input
+                                type="text"
+                                value={formData.motherSonSong || ''}
+                                onChange={(e) => updateFormData('motherSonSong', e.target.value)}
+                                placeholder='e.g., "Yellow" by Coldplay or N/A'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Other Special Dance Songs (please include the people involved)">
+                            <textarea
+                                value={formData.otherSpecialDances || ''}
+                                onChange={(e) => updateFormData('otherSpecialDances', e.target.value)}
+                                placeholder="List any other special dances and who they're for"
+                                rows="3"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+                    </div>
+
+                    <div className="space-y-4 border-t pt-6">
+                        <h4 className="font-semibold text-gray-900">Event Songs</h4>
+                        <p className="text-sm text-gray-600">
+                            These can be filled out or left blank and I will use my own discretion. My recommendations are listed as placeholders.
+                        </p>
+                        
+                        <FormField label="Cake Cutting Song">
+                            <input
+                                type="text"
+                                value={formData.cakeSong || ''}
+                                onChange={(e) => updateFormData('cakeSong', e.target.value)}
+                                placeholder='Pour Some Sugar On Me / Sugar / Cake'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Bouquet Toss Song">
+                            <input
+                                type="text"
+                                value={formData.bouquetSong || ''}
+                                onChange={(e) => updateFormData('bouquetSong', e.target.value)}
+                                placeholder='Single Ladies / Where Them Girls At?'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Garter Toss Song">
+                            <input
+                                type="text"
+                                value={formData.garterSong || ''}
+                                onChange={(e) => updateFormData('garterSong', e.target.value)}
+                                placeholder="Let's Get It On / Brick House / Pony"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Grand Exit Song">
+                            <input
+                                type="text"
+                                value={formData.exitSong || ''}
+                                onChange={(e) => updateFormData('exitSong', e.target.value)}
+                                placeholder='Celebration / Firework / Blinding Lights'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+
+                        <FormField label="Private Last Dance between Bride & Groom">
+                            <input
+                                type="text"
+                                value={formData.lastDanceSong || ''}
+                                onChange={(e) => updateFormData('lastDanceSong', e.target.value)}
+                                placeholder='Optional private moment song'
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </FormField>
+                    </div>
+                </div>
+            );
+        }
+
+        function SongsSection({ formData, updateFormData }) {
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Other Song Selection</h3>
+                    
+                    <p className="text-gray-700">
+                        Here you can list any songs you would like to hear at your reception. From slow, easy music while guests 
+                        are eating to the fun party music. This isn't required, but available if you want to hear anything specific. 
+                        I will take these suggestions and play off of the crowd as well.
+                    </p>
+
+                    <p className="text-sm font-medium text-gray-700">
+                        <strong>***I cannot guarantee that every song listed below will be played during the reception.***</strong>
+                    </p>
+
+                    <FormField label="Spotify or Apple Music Playlist Links">
+                        <textarea
+                            value={formData.playlistLinks || ''}
+                            onChange={(e) => updateFormData('playlistLinks', e.target.value)}
+                            placeholder="Paste your playlist links here (one per line)"
+                            rows="4"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Songs you'd love to hear">
+                        <textarea
+                            value={formData.requestedSongs || ''}
+                            onChange={(e) => updateFormData('requestedSongs', e.target.value)}
+                            placeholder="List specific songs you'd like to hear"
+                            rows="6"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Genres you'd like to stick to">
+                        <input
+                            type="text"
+                            value={formData.genres || ''}
+                            onChange={(e) => updateFormData('genres', e.target.value)}
+                            placeholder="e.g., pop/modern/rap towards the end"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="DO NOT PLAY THESE SONGS">
+                        <textarea
+                            value={formData.doNotPlaySongs || ''}
+                            onChange={(e) => updateFormData('doNotPlaySongs', e.target.value)}
+                            placeholder="List any songs you DO NOT want played"
+                            rows="6"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+                </div>
+            );
+        }
+
+        function CeremonySection({ formData, updateFormData }) {
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Ceremony Song Selection</h3>
+                    
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-blue-900">
+                            This section is only if you have asked me to do your ceremony. 
+                            If nothing is put in these boxes, I will play what I feel fits best.
+                        </p>
+                    </div>
+
+                    <FormField label="Time of Ceremony">
+                        <input
+                            type="time"
+                            value={formData.ceremonyTime || ''}
+                            onChange={(e) => updateFormData('ceremonyTime', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Order of the party entering the ceremony">
+                        <input
+                            type="text"
+                            value={formData.ceremonyEntryOrder || ''}
+                            onChange={(e) => updateFormData('ceremonyEntryOrder', e.target.value)}
+                            placeholder="e.g., Grandparents, parents, bridal party, bride"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Songs for each party entering">
+                        <textarea
+                            value={formData.ceremonySongs || ''}
+                            onChange={(e) => updateFormData('ceremonySongs', e.target.value)}
+                            placeholder="List songs for each group. Include YouTube links if specific. Example:&#10;Grandparents/parents - [YouTube link]&#10;Bride - [YouTube link]"
+                            rows="6"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="text-sm text-gray-600 mt-2">
+                            If a song is not specified, the song from the previous party will continue to play. 
+                            I recommend one song for family and bridal party, then one song for the bride.
+                        </p>
+                    </FormField>
+
+                    <FormField label="Will there be a unity ceremony? If yes, what song?">
+                        <input
+                            type="text"
+                            value={formData.unityCeremonySong || ''}
+                            onChange={(e) => updateFormData('unityCeremonySong', e.target.value)}
+                            placeholder="Leave blank if no unity ceremony"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <FormField label="Recessional Song">
+                        <input
+                            type="text"
+                            value={formData.recessionalSong || ''}
+                            onChange={(e) => updateFormData('recessionalSong', e.target.value)}
+                            placeholder='e.g., "Everywhere, Everything" by Noah Kahan and Gracie Abrams'
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="text-sm text-gray-600 mt-2">
+                            This song will be played after the officiant says "I present to you for the first time, Mr. & Mrs. XXXX" 
+                            and you begin walking down the aisle.
+                        </p>
+                    </FormField>
+
+                    <FormField label="Anything else about the ceremony?">
+                        <textarea
+                            value={formData.ceremonyNotes || ''}
+                            onChange={(e) => updateFormData('ceremonyNotes', e.target.value)}
+                            placeholder="Any other details I should know about the ceremony"
+                            rows="3"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </FormField>
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <p className="text-sm text-gray-700">
+                            <strong>After the ceremony:</strong> I typically will take half of my setup to the ceremony location 
+                            (unless ceremony and reception are in the same place), and set up for the ceremony. After the ceremony, 
+                            I will take my equipment back and set it up with the rest for the reception. This transition usually takes 10-15 minutes.
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        function AdditionalSection({ formData, updateFormData }) {
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Additional Information</h3>
+                    
+                    <FormField label="Do you want dance floor lighting?" required>
+                        <select
+                            value={formData.danceFloorLighting || ''}
+                            onChange={(e) => updateFormData('danceFloorLighting', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Select...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                        <p className="text-sm text-gray-600 mt-2">
+                            Dance floor lighting is free and is a fun thing to add to the atmosphere of the dancing portion of your reception.
+                        </p>
+                    </FormField>
+
+                    <FormField label="Do you want uplighting?" required>
+                        <select
+                            value={formData.uplighting || ''}
+                            onChange={(e) => updateFormData('uplighting', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Select...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                        <p className="text-sm text-gray-600 mt-2">
+                            Uplighting is a paid add-on, but is also very fun!
+                        </p>
+                    </FormField>
+
+                    <FormField label="Anything else I need to know about the reception?">
+                        <textarea
+                            value={formData.receptionNotes || ''}
+                            onChange={(e) => updateFormData('receptionNotes', e.target.value)}
+                            placeholder="Any special requirements, venue details, equipment needs, etc."
+                            rows="5"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="text-sm text-gray-600 mt-2">
+                            If not specified, I cannot guarantee that I can supply what you are needing.
+                        </p>
+                    </FormField>
+                </div>
+            );
+        }
+
+        function FormField({ label, required, children }) {
+            return (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {label} {required && <span className="text-red-500">*</span>}
+                    </label>
+                    {children}
+                </div>
+            );
+        }
+
+        function SaveButton({ handleSave, loading, saveMessage, error }) {
+            return (
+                <div className="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                            {saveMessage && (
+                                <p className="text-green-600 font-medium">{saveMessage}</p>
+                            )}
+                            {error && (
+                                <p className="text-red-600 text-sm">{error}</p>
+                            )}
+                        </div>
+                        <button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="ml-4 bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                        >
+                            {loading ? 'Saving...' : 'Save Progress'}
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                        Your information is automatically saved. You can come back anytime to update your details.
+                    </p>
+                </div>
+            );
+        }
+
+        const root = createRoot(document.getElementById('app'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
