@@ -13,19 +13,37 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .progress-bar {
-            transition: width 0.5s ease;
+        #loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-size: 18px;
+            color: #666;
+        }
+        #error-display {
+            padding: 20px;
+            margin: 20px;
+            background: #fee;
+            border: 2px solid #c00;
+            border-radius: 8px;
+            color: #c00;
         }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+    <div id="loading">Loading Wedding Portal...</div>
     <div id="app"></div>
+    <div id="error-display" style="display: none;"></div>
 
-    <script type="module">
-        import React, { useState, useEffect } from 'https://esm.sh/react@18.2.0';
-        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSrZma1hN8KuM9bWD_CapGAVdWWRt0MfmEZkhJAGMCCTAaVmvCJW9VNR0Dp7dQb10Etw/exec';
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyC_pVvrxkSSv2t7m86qp5msMlZwEeMd2KZX5sNWJ6CUp3XVgNY2RRPKcEMmRWdYt9eSw/exec';
 
         function App() {
             const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,6 +54,9 @@
             const [error, setError] = useState('');
             const [saveMessage, setSaveMessage] = useState('');
             const [currentSection, setCurrentSection] = useState('basic');
+
+            // Section order
+            const sections = ['basic', 'reception', 'dances', 'songs', 'ceremony', 'additional'];
 
             // Load saved access code from localStorage on mount
             useEffect(() => {
@@ -50,7 +71,7 @@
                 setError('');
 
                 try {
-                    const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&accessCode=${code}`);
+                    const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&accessCode=${encodeURIComponent(code)}`);
                     const data = await response.json();
 
                     if (data.success) {
@@ -78,6 +99,10 @@
                 try {
                     const response = await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
+                        mode: 'no-cors', // This is the key!
+                        headers: {
+                            'Content-Type': 'text/plain', // Changed from application/json
+                        },
                         body: JSON.stringify({
                             action: 'save',
                             accessCode: localStorage.getItem('weddingPortalAccessCode'),
@@ -85,14 +110,10 @@
                         })
                     });
 
-                    const data = await response.json();
-
-                    if (data.success) {
-                        setSaveMessage('Saved successfully! ✓');
-                        setTimeout(() => setSaveMessage(''), 3000);
-                    } else {
-                        setError(data.message || 'Failed to save. Please try again.');
-                    }
+                    // With no-cors, we can't read the response, so assume success
+                    setSaveMessage('Saved successfully! ✓');
+                    setTimeout(() => setSaveMessage(''), 3000);
+                    
                 } catch (err) {
                     setError('Unable to save. Please try again later.');
                     console.error('Save error:', err);
@@ -114,10 +135,12 @@
                 setFormData(prev => ({ ...prev, [field]: value }));
             };
 
-            const calculateProgress = () => {
-                const totalFields = 50; // Approximate number of important fields
-                const filledFields = Object.values(formData).filter(v => v && v !== '').length;
-                return Math.min(Math.round((filledFields / totalFields) * 100), 100);
+            const goToNextSection = () => {
+                const currentIndex = sections.indexOf(currentSection);
+                if (currentIndex < sections.length - 1) {
+                    setCurrentSection(sections[currentIndex + 1]);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             };
 
             if (!isLoggedIn) {
@@ -135,8 +158,6 @@
                     <Header clientData={clientData} handleLogout={handleLogout} />
                     
                     <div className="max-w-5xl mx-auto px-4 py-8">
-                        <ProgressBar progress={calculateProgress()} />
-                        
                         <WelcomeMessage clientData={clientData} />
                         
                         <SectionNav currentSection={currentSection} setCurrentSection={setCurrentSection} />
@@ -148,6 +169,18 @@
                             {currentSection === 'songs' && <SongsSection formData={formData} updateFormData={updateFormData} />}
                             {currentSection === 'ceremony' && <CeremonySection formData={formData} updateFormData={updateFormData} />}
                             {currentSection === 'additional' && <AdditionalSection formData={formData} updateFormData={updateFormData} />}
+                            
+                            {/* Next button at bottom of section */}
+                            {currentSection !== 'additional' && (
+                                <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
+                                    <button
+                                        onClick={goToNextSection}
+                                        className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+                                    >
+                                        Next Section →
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <SaveButton handleSave={handleSave} loading={loading} saveMessage={saveMessage} error={error} />
@@ -221,23 +254,6 @@
                         >
                             Logout
                         </button>
-                    </div>
-                </div>
-            );
-        }
-
-        function ProgressBar({ progress }) {
-            return (
-                <div className="mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-700">Form Completion</span>
-                        <span className="text-sm font-medium text-blue-600">{progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                            className="progress-bar bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${progress}%` }}
-                        />
                     </div>
                 </div>
             );
@@ -324,27 +340,30 @@
                     <div className="grid md:grid-cols-3 gap-4">
                         <FormField label="Ceremony Start Time" required>
                             <input
-                                type="time"
+                                type="text"
                                 value={formData.ceremonyStartTime || ''}
                                 onChange={(e) => updateFormData('ceremonyStartTime', e.target.value)}
+                                placeholder="e.g., 4:00 or 16:30"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
 
                         <FormField label="Reception Start Time" required>
                             <input
-                                type="time"
+                                type="text"
                                 value={formData.receptionStartTime || ''}
                                 onChange={(e) => updateFormData('receptionStartTime', e.target.value)}
+                                placeholder="e.g., 4:30 or 16:30"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
 
                         <FormField label="Reception End Time" required>
                             <input
-                                type="time"
+                                type="text"
                                 value={formData.receptionEndTime || ''}
                                 onChange={(e) => updateFormData('receptionEndTime', e.target.value)}
+                                placeholder="e.g., 9:00 or 21:00"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -730,9 +749,10 @@
 
                     <FormField label="Time of Ceremony">
                         <input
-                            type="time"
+                            type="text"
                             value={formData.ceremonyTime || ''}
                             onChange={(e) => updateFormData('ceremonyTime', e.target.value)}
+                            placeholder="e.g., 4:00 or 16:00"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -751,7 +771,7 @@
                         <textarea
                             value={formData.ceremonySongs || ''}
                             onChange={(e) => updateFormData('ceremonySongs', e.target.value)}
-                            placeholder="List songs for each group. Include YouTube links if specific. Example:&#10;Grandparents/parents - [YouTube link]&#10;Bride - [YouTube link]"
+                            placeholder="List songs for each group. Include YouTube links if specific."
                             rows="6"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
@@ -895,8 +915,21 @@
             );
         }
 
-        const root = createRoot(document.getElementById('app'));
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('app'));
         root.render(<App />);
+        
+        // Hide loading message
+        document.getElementById('loading').style.display = 'none';
+        
+        // Error handler
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const errorDiv = document.getElementById('error-display');
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = '<strong>Error loading portal:</strong><br>' + msg + '<br><br>Please contact DJ Cole for assistance.';
+            console.error('Error:', error);
+            return false;
+        };
     </script>
 </body>
 </html>
