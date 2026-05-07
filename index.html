@@ -154,12 +154,6 @@
                 setLoading(false);
             };
 
-            const handleExportTXT = () => {
-                const accessCode = localStorage.getItem('weddingPortalAccessCode');
-                const url = `${GOOGLE_SCRIPT_URL}?action=exportTXT&accessCode=${accessCode}`;
-                window.open(url, '_blank');
-            };
-
             const handleLogout = () => {
                 setIsLoggedIn(false);
                 setAccessCode('');
@@ -223,16 +217,6 @@
                         </div>
 
                         <SaveButton handleSave={handleSave} loading={loading} saveMessage={saveMessage} error={error} />
-                        
-                        <div className="mt-4">
-                            <button
-                                onClick={handleExportTXT}
-                                disabled={loading}
-                                className="w-full bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
-                            >
-                                📄 Export as TXT File
-                            </button>
-                        </div>
                     </div>
                 </div>
             );
@@ -240,11 +224,13 @@
 
         function LoginScreen({ accessCode, setAccessCode, handleLogin, loading, error }) {
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-                    <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-                        <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">DJ Cole</h1>
-                            <p className="text-gray-600">Wedding Planning Portal</p>
+               <div className="text-center mb-8">
+                    <img 
+                        src="https://raw.githubusercontent.com/djcolemaddox/client-portal/main/DJ%20Cole%20Maddox%20Website%20Banner.png" 
+                        alt="DJ Cole Entertainment" 
+                        className="h-20 mx-auto mb-4"
+                    />
+                        <p className="text-gray-600">Wedding Planning Portal</p>
                         </div>
 
                         <div className="mb-6">
@@ -292,7 +278,7 @@
                 <div className="bg-white border-b border-gray-200">
                     <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">DJ Cole - Wedding Planning</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">DJ Cole Maddox - Wedding Planning Portal</h1>
                             <p className="text-sm text-gray-600">
                                 {clientData?.name} • {new Date(clientData?.weddingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                             </p>
@@ -412,7 +398,7 @@
                             type="text"
                             value={formData.coupleNames || ''}
                             onChange={(e) => updateFormData('coupleNames', e.target.value)}
-                            placeholder="e.g., Camille Tims & Parker Carlson"
+                            placeholder="e.g., Cole Maddox & Noelle Mathis"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -422,7 +408,7 @@
                             type="text"
                             value={formData.marriedName || ''}
                             onChange={(e) => updateFormData('marriedName', e.target.value)}
-                            placeholder="e.g., Parker & Camille Carlson"
+                            placeholder="e.g., Mr. & Mrs. Maddox"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -431,7 +417,7 @@
                         <textarea
                             value={formData.venueAddress || ''}
                             onChange={(e) => updateFormData('venueAddress', e.target.value)}
-                            placeholder="Enter full address"
+                            placeholder="Enter full address / Multiple addresses if needed"
                             rows="2"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
@@ -443,7 +429,7 @@
                                 type="text"
                                 value={formData.ceremonyStartTime || ''}
                                 onChange={(e) => updateFormData('ceremonyStartTime', e.target.value)}
-                                placeholder="e.g., 4:00"
+                                placeholder="e.g., 4:00pm"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -453,7 +439,7 @@
                                 type="text"
                                 value={formData.receptionStartTime || ''}
                                 onChange={(e) => updateFormData('receptionStartTime', e.target.value)}
-                                placeholder="e.g., 4:30"
+                                placeholder="e.g., 4:30pm"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -463,7 +449,7 @@
                                 type="text"
                                 value={formData.receptionEndTime || ''}
                                 onChange={(e) => updateFormData('receptionEndTime', e.target.value)}
-                                placeholder="e.g., 9:00"
+                                placeholder="e.g., 9:00pm"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -488,7 +474,7 @@
                             type="text"
                             value={formData.photographer || ''}
                             onChange={(e) => updateFormData('photographer', e.target.value)}
-                            placeholder="e.g., Taylor Patrick - Photography"
+                            placeholder="Photographer's Business Name"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -507,7 +493,7 @@
                             type="text"
                             value={formData.hashtag || ''}
                             onChange={(e) => updateFormData('hashtag', e.target.value)}
-                            placeholder="e.g., #KeepingupwiththeCarlsons"
+                            placeholder="e.g., #MaddoxMadeInHeaven"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -528,7 +514,7 @@
                         {formData.providingCeremonySound === 'yes' && (
                             <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <p className="text-sm text-blue-900">
-                                    <strong>Great!</strong> The packaged hour allotment begins when the ceremony begins.
+                                    <strong>Great!</strong> The packaged hour allotment begins when the ceremony begins. Let's begin with some ceremony specifics.
                                 </p>
                             </div>
                         )}
@@ -589,7 +575,7 @@
                             type="text"
                             value={formData.announcedName || ''}
                             onChange={(e) => updateFormData('announcedName', e.target.value)}
-                            placeholder="e.g., Mr. & Mrs. Parker Carlson"
+                            placeholder="e.g., Mr. & Mrs. Maddox"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -599,7 +585,7 @@
                             type="text"
                             value={formData.bridalPartySong || ''}
                             onChange={(e) => updateFormData('bridalPartySong', e.target.value)}
-                            placeholder='e.g., "Dog Days Are Over" by Florence and the Machine'
+                            placeholder='e.g., Uptown Funk by Bruno Mars'
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -609,7 +595,7 @@
                             type="text"
                             value={formData.coupleAnnouncementSong || ''}
                             onChange={(e) => updateFormData('coupleAnnouncementSong', e.target.value)}
-                            placeholder='e.g., "Dog Days Are Over" by Florence and the Machine'
+                            placeholder='e.g., Uptown Funk by Bruno Mars'
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -619,7 +605,7 @@
                             type="text"
                             value={formData.blessing || ''}
                             onChange={(e) => updateFormData('blessing', e.target.value)}
-                            placeholder="e.g., Yes, bride's father"
+                            placeholder="e.g., Yes, pastor"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -798,7 +784,7 @@
                                 type="text"
                                 value={formData.lastDanceSong || ''}
                                 onChange={(e) => updateFormData('lastDanceSong', e.target.value)}
-                                placeholder='Optional private moment song'
+                                placeholder='This could even be a replay of your first dance song, or the backup choice, up to you!'
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -825,7 +811,7 @@
                     <div className="space-y-4 border-t pt-6">
                         <h4 className="font-semibold text-gray-900">Playlists</h4>
                         
-                        <FormField label="Spotify Playlist URL(s)">
+                        <FormField label="Spotify/Apple Music Playlist URL(s)">
                             <textarea
                                 value={formData.spotifyPlaylists || ''}
                                 onChange={(e) => updateFormData('spotifyPlaylists', e.target.value)}
@@ -837,40 +823,8 @@
                                 Example: https://open.spotify.com/playlist/...
                             </p>
                         </FormField>
-
-                        <FormField label="Apple Music Playlist URL(s)">
-                            <textarea
-                                value={formData.appleMusicPlaylists || ''}
-                                onChange={(e) => updateFormData('appleMusicPlaylists', e.target.value)}
-                                placeholder="Paste Apple Music playlist link(s) here (one per line)"
-                                rows="3"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Example: https://music.apple.com/us/playlist/...
-                            </p>
-                        </FormField>
-
-                        <FormField label="Cocktail Hour Playlist Name">
-                            <input
-                                type="text"
-                                value={formData.cocktailHourPlaylist || ''}
-                                onChange={(e) => updateFormData('cocktailHourPlaylist', e.target.value)}
-                                placeholder='e.g., "Wedding Before 9"'
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </FormField>
+            
                     </div>
-
-                    <FormField label="Songs you'd love to hear">
-                        <textarea
-                            value={formData.requestedSongs || ''}
-                            onChange={(e) => updateFormData('requestedSongs', e.target.value)}
-                            placeholder="List specific songs you'd like to hear"
-                            rows="6"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </FormField>
 
                     <FormField label="MUST PLAY Songs">
                         <textarea
@@ -881,7 +835,7 @@
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="text-sm text-gray-600 mt-2">
-                            These songs will be highlighted in your event sheet as priority.
+                            These songs will be played at some point in the night!
                         </p>
                     </FormField>
 
