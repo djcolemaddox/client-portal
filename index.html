@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DJ Cole - Wedding Planning Portal</title>
+    <title>DJ Cole Maddox - Wedding Planning Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #loading {
@@ -237,7 +237,11 @@
                 <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
                     <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
                         <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">DJ Cole</h1>
+                            <img 
+                                src="https://github.com/djcolemaddox/client-portal/blob/main/DJ%20Cole%20Maddox%20Website%20Banner.png?raw=true" 
+                                alt="DJ Cole Maddox" 
+                                className="max-w-xs mx-auto mb-4"
+                            />
                             <p className="text-gray-600">Wedding Planning Portal</p>
                         </div>
 
@@ -415,7 +419,7 @@
                             type="text"
                             value={formData.coupleNames || ''}
                             onChange={(e) => updateFormData('coupleNames', e.target.value)}
-                            placeholder="e.g., Camille Tims & Parker Carlson"
+                            placeholder="e.g., Cole Maddox & Noelle Mathis"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -425,7 +429,7 @@
                             type="text"
                             value={formData.marriedName || ''}
                             onChange={(e) => updateFormData('marriedName', e.target.value)}
-                            placeholder="e.g., Parker & Camille Carlson"
+                            placeholder="e.g., Cole & Noelle Maddox"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -434,7 +438,7 @@
                         <textarea
                             value={formData.venueAddress || ''}
                             onChange={(e) => updateFormData('venueAddress', e.target.value)}
-                            placeholder="Enter full address"
+                            placeholder="Enter full address + another address if the ceremony is at another location"
                             rows="2"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
@@ -446,7 +450,7 @@
                                 type="text"
                                 value={formData.ceremonyStartTime || ''}
                                 onChange={(e) => updateFormData('ceremonyStartTime', e.target.value)}
-                                placeholder="e.g., 4:00"
+                                placeholder="e.g., 4:00qpm"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -456,7 +460,7 @@
                                 type="text"
                                 value={formData.receptionStartTime || ''}
                                 onChange={(e) => updateFormData('receptionStartTime', e.target.value)}
-                                placeholder="e.g., 4:30"
+                                placeholder="e.g., 4:30pm"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -466,7 +470,7 @@
                                 type="text"
                                 value={formData.receptionEndTime || ''}
                                 onChange={(e) => updateFormData('receptionEndTime', e.target.value)}
-                                placeholder="e.g., 9:00"
+                                placeholder="e.g., 9:00pm"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -491,7 +495,7 @@
                             type="text"
                             value={formData.photographer || ''}
                             onChange={(e) => updateFormData('photographer', e.target.value)}
-                            placeholder="e.g., Taylor Patrick - Photography"
+                            placeholder="e.g., Photographer's Business Name"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -601,7 +605,7 @@
                             type="text"
                             value={formData.announcedName || ''}
                             onChange={(e) => updateFormData('announcedName', e.target.value)}
-                            placeholder="e.g., Mr. & Mrs. Parker Carlson"
+                            placeholder="e.g., Mr. & Mrs. Cole Maddox"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -611,7 +615,7 @@
                             type="text"
                             value={formData.bridalPartySong || ''}
                             onChange={(e) => updateFormData('bridalPartySong', e.target.value)}
-                            placeholder='e.g., "Dog Days Are Over" by Florence and the Machine'
+                            placeholder='e.g., Grove St Party by Waka Flocka'
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -621,7 +625,7 @@
                             type="text"
                             value={formData.coupleAnnouncementSong || ''}
                             onChange={(e) => updateFormData('coupleAnnouncementSong', e.target.value)}
-                            placeholder='e.g., "Dog Days Are Over" by Florence and the Machine'
+                            placeholder='e.g., 24k Magic by Bruno Mars'
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -631,7 +635,7 @@
                             type="text"
                             value={formData.blessing || ''}
                             onChange={(e) => updateFormData('blessing', e.target.value)}
-                            placeholder="e.g., Yes, bride's father"
+                            placeholder="e.g., Yes, the pastor"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </FormField>
@@ -723,7 +727,6 @@
                                 type="text"
                                 value={formData.firstDanceSong || ''}
                                 onChange={(e) => updateFormData('firstDanceSong', e.target.value)}
-                                placeholder='e.g., "Lifetime" by Justin Bieber'
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -733,7 +736,6 @@
                                 type="text"
                                 value={formData.fatherDaughterSong || ''}
                                 onChange={(e) => updateFormData('fatherDaughterSong', e.target.value)}
-                                placeholder='e.g., "Landslide" by Fleetwood Mac or N/A'
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -743,7 +745,6 @@
                                 type="text"
                                 value={formData.motherSonSong || ''}
                                 onChange={(e) => updateFormData('motherSonSong', e.target.value)}
-                                placeholder='e.g., "Yellow" by Coldplay or N/A'
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -752,7 +753,7 @@
                             <textarea
                                 value={formData.otherSpecialDances || ''}
                                 onChange={(e) => updateFormData('otherSpecialDances', e.target.value)}
-                                placeholder="List any other special dances and who they're for"
+                                placeholder="List any other special dances and who they're with"
                                 rows="3"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
@@ -810,7 +811,6 @@
                                 type="text"
                                 value={formData.lastDanceSong || ''}
                                 onChange={(e) => updateFormData('lastDanceSong', e.target.value)}
-                                placeholder='Optional private moment song'
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -837,11 +837,11 @@
                     <div className="space-y-4 border-t pt-6">
                         <h4 className="font-semibold text-gray-900">Playlists</h4>
                         
-                        <FormField label="Spotify Playlist URL(s)">
+                        <FormField label="Spotify or Apple Music Playlist URL(s)">
                             <textarea
                                 value={formData.spotifyPlaylists || ''}
                                 onChange={(e) => updateFormData('spotifyPlaylists', e.target.value)}
-                                placeholder="Paste Spotify playlist link(s) here (one per line)"
+                                placeholder="Paste Spotify or Apple Music playlist link(s) here if you have a playlist going (one per line)"
                                 rows="3"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
@@ -850,39 +850,7 @@
                             </p>
                         </FormField>
 
-                        <FormField label="Apple Music Playlist URL(s)">
-                            <textarea
-                                value={formData.appleMusicPlaylists || ''}
-                                onChange={(e) => updateFormData('appleMusicPlaylists', e.target.value)}
-                                placeholder="Paste Apple Music playlist link(s) here (one per line)"
-                                rows="3"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Example: https://music.apple.com/us/playlist/...
-                            </p>
-                        </FormField>
-
-                        <FormField label="Cocktail Hour Playlist Name">
-                            <input
-                                type="text"
-                                value={formData.cocktailHourPlaylist || ''}
-                                onChange={(e) => updateFormData('cocktailHourPlaylist', e.target.value)}
-                                placeholder='e.g., "Wedding Before 9"'
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </FormField>
                     </div>
-
-                    <FormField label="Songs you'd love to hear">
-                        <textarea
-                            value={formData.requestedSongs || ''}
-                            onChange={(e) => updateFormData('requestedSongs', e.target.value)}
-                            placeholder="List specific songs you'd like to hear"
-                            rows="6"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </FormField>
 
                     <FormField label="MUST PLAY Songs">
                         <textarea
@@ -893,7 +861,7 @@
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="text-sm text-gray-600 mt-2">
-                            These songs will be highlighted in your event sheet as priority.
+                            These songs will be played at some point in the night! Let me know if you have any that need certain people on the dance floor with you.
                         </p>
                     </FormField>
 
@@ -953,7 +921,7 @@
                                     type="text"
                                     value={formData.ceremonyFamilySong || ''}
                                     onChange={(e) => updateFormData('ceremonyFamilySong', e.target.value)}
-                                    placeholder="Song for family and groom processional"
+                                    placeholder="If more specifics are needed, list them in the Anything else about the ceremony? section."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </FormField>
@@ -963,7 +931,7 @@
                                     type="text"
                                     value={formData.ceremonyBridalPartySong || ''}
                                     onChange={(e) => updateFormData('ceremonyBridalPartySong', e.target.value)}
-                                    placeholder="Song for bridal party processional"
+                                    placeholder="If more specifics are needed, list them in the Anything else about the ceremony? section."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </FormField>
@@ -973,7 +941,7 @@
                                     type="text"
                                     value={formData.ceremonyBrideSong || ''}
                                     onChange={(e) => updateFormData('ceremonyBrideSong', e.target.value)}
-                                    placeholder="Song for bride's processional"
+                                    placeholder="If more specifics are needed, list them in the Anything else about the ceremony? section."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </FormField>
@@ -995,11 +963,10 @@
                             type="text"
                             value={formData.recessionalSong || ''}
                             onChange={(e) => updateFormData('recessionalSong', e.target.value)}
-                            placeholder='e.g., "Everywhere, Everything" by Noah Kahan and Gracie Abrams'
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="text-sm text-gray-600 mt-2">
-                            This song will be played after the officiant says "I present to you for the first time, Mr. & Mrs. XXXX" 
+                            This song will be played after the officiant says "I present to you for the first time, Mr. & Mrs. Maddox" 
                             and you begin walking down the aisle.
                         </p>
                     </FormField>
@@ -1068,9 +1035,6 @@
                             rows="5"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <p className="text-sm text-gray-600 mt-2">
-                            If not specified, I cannot guarantee that I can supply what you are needing.
-                        </p>
                     </FormField>
                 </div>
             );
