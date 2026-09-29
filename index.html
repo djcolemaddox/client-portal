@@ -837,11 +837,11 @@
                     <div className="space-y-4 border-t pt-6">
                         <h4 className="font-semibold text-gray-900">Playlists</h4>
                         
-                        <FormField label="Spotify or Apple Music Playlist URL(s)">
+                        <FormField label="Playlist Link(s)">
                             <textarea
-                                value={formData.spotifyPlaylists || ''}
-                                onChange={(e) => updateFormData('spotifyPlaylists', e.target.value)}
-                                placeholder="Paste Spotify or Apple Music playlist link(s) here if you have a playlist going (one per line)"
+                                value={formData.playlistLinks || ''}
+                                onChange={(e) => updateFormData('playlistLinks', e.target.value)}
+                                placeholder="Paste Spotify or Apple Music playlist link(s) here (one per line)"
                                 rows="3"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
