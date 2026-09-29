@@ -714,7 +714,7 @@
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="text-sm text-gray-600 mt-2">
-                            I will usually let these songs play out about 2 to 2.5 minutes before fading out, but I can let them play longer or shorten them if needed. 
+                            You can put "As Above" if you'd like it to be First Dance / Daddy Daughter / Mother Son. I will usually let these songs play out about 2 to 2.5 minutes before fading out, but I can let them play longer or shorten them if needed. 
                             If you're ready to end the song, look at me and nod your head or give me the "ok you can fade it out" look.
                         </p>
                     </FormField>
@@ -1045,10 +1045,13 @@
                         <textarea
                             value={formData.receptionNotes || ''}
                             onChange={(e) => updateFormData('receptionNotes', e.target.value)}
-                            placeholder="Any special requirements, venue details, equipment needs, etc."
+                            placeholder="Any special requirements, venue details, equipment needs, things that may happen during the ceremony like a special game, etc."
                             rows="5"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
+                        <p className="text-sm text-gray-600 mt-2">
+                            This is the last section, be sure to hit save!
+                        </p>
                     </FormField>
                 </div>
             );
