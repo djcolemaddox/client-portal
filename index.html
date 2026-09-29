@@ -714,7 +714,7 @@
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="text-sm text-gray-600 mt-2">
-                            I will usually let these play out about 2 to 2.5 minutes before fading out, but I can let them play longer or shorten them if needed. 
+                            I will usually let these songs play out about 2 to 2.5 minutes before fading out, but I can let them play longer or shorten them if needed. 
                             If you're ready to end the song, look at me and nod your head or give me the "ok you can fade it out" look.
                         </p>
                     </FormField>
@@ -757,6 +757,11 @@
                                 rows="3"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
+                             <p className="text-sm text-gray-600 mt-2">
+                                Please include here too if the Bride or Groom will be dancing with a step-parent and how you would like that announced. 
+                                 For example, "[Bride Name here], if you could, please bring your step-dad on out to the dance floor." Or, feel free to include any other dances like maybe a dance
+                                 being added with the child of the couple, or bride will be dancing with her mom. Really, anything that is different or in addtion to what is above.
+                                </p>
                         </FormField>
                     </div>
 
@@ -771,7 +776,7 @@
                                 type="text"
                                 value={formData.cakeSong || ''}
                                 onChange={(e) => updateFormData('cakeSong', e.target.value)}
-                                placeholder='Pour Some Sugar On Me / Sugar / Cake'
+                                placeholder='Pour Some Sugar On Me / Sugar by Maroon 5 / Cake by Flo Rida'
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -791,7 +796,7 @@
                                 type="text"
                                 value={formData.garterSong || ''}
                                 onChange={(e) => updateFormData('garterSong', e.target.value)}
-                                placeholder="Let's Get It On / Brick House / Pony"
+                                placeholder="Let's Get It On / Brick House / Pony by Ginuwine"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </FormField>
@@ -846,7 +851,9 @@
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                Example: https://open.spotify.com/playlist/...
+                                If you have more than one playlist, please list them one per line. You can also include what the playlist is for. Maybe, you've created
+                                a playlist for cocktail hour/dinner, then another for dancing, then another for the later hours of the reception. Here's an example of what a playlist 
+                                might look like - Example: Cocktail Hour - https://open.spotify.com/playlist/...
                             </p>
                         </FormField>
 
@@ -934,6 +941,9 @@
                                     placeholder="If more specifics are needed, list them in the Anything else about the ceremony? section."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
+                                <p className="text-sm text-gray-600 mt-2">
+                                    You can leave this blank or put "same song" if the same song will continue to play for the bridal party.
+                                </p>
                             </FormField>
 
                             <FormField label="Song for Bride's Entrance">
@@ -979,6 +989,10 @@
                             rows="3"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
+                        <p className="text-sm text-gray-600 mt-2">
+                            Things to list here might include; if there is a specific order of parties entering the ceremony, maybe something 
+                            special that could be happening during the ceremony that I should know about, or maybe if a second microphone could be needed for a certain portion of the ceremony, etc.
+                        </p>
                     </FormField>
 
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
